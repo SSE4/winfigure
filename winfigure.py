@@ -32,6 +32,7 @@ def run(language, args):
 	filename = None
 	index = 0
 	output_name = None
+	mode = "exe"
 	while index < len(args):
 		option = args[index]
 		if len(option) == 2 and option[0] == "-":
@@ -40,6 +41,7 @@ def run(language, args):
 			if short_option == "c":
 				# -c compile or assemble the source files, but do not link
 				cl_options.append("/c") # /c Compiles without linking
+				mode = "obj"
 			elif short_option == "w":
 				# -w Inhibit all warning messages
 				cl_options.append("/w") # /w Disables all warnings
@@ -76,7 +78,10 @@ def run(language, args):
 	options = cl_options
 	options.append(filename)
 	if output_name:
-		options.append("/Fe%s" % output_name)
+		if mode == "exe":
+			options.append("/Fe%s" % output_name)
+		elif mode == "obj":
+			options.append("/Fo%s" % output_name)
 	status = run_cl(options)
 
 	return status
