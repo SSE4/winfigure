@@ -62,6 +62,7 @@ def run(language, args):
 	logging.info("winfigure called with arguments %s" % str(args))
 
 	cl_options = ["cl.exe"]
+	link_options = []
 	filename = None
 	index = 0
 	output_name = None
@@ -110,6 +111,9 @@ def run(language, args):
 				# Add the directory dir to the list of directories to be searched for header files
 				dir = option[2:]
 				cl_options.extend(["/I", dir])
+			elif short_option == "L":
+				dir = option[2:]
+				link_options.append("/LIBPATH:%s" % dir)
 			else:
 				raise Exception("unknown option %s" % option)
 		else:
@@ -124,6 +128,9 @@ def run(language, args):
 			cl_options.append("/Fo%s" % output_name)
 		elif mode == "preprocessor":
 			cl_options.append("/Fi%s" % output_name)
+	if link_options:
+		cl_options.append("/link")
+		cl_options.extend(link_options)
 	status = run_tool(cl_options)
 
 	return status
