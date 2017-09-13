@@ -5,30 +5,63 @@ import logging
 import subprocess
 import os
 
-def run_cl(args):
+def run_tool(args):
 	program_files = os.environ.get("ProgramFiles(x86)", os.environ.get("ProgramFiles"))
 	vswhere_path = os.path.join(program_files, "Microsoft Visual Studio", "Installer", "vswhere.exe")
 	output = subprocess.check_output([vswhere_path, "-version", "[15.0, 16.0)", "-legacy", "-property", "InstallationPath"])
 	vs_path = output.decode().strip()
 	vcvars_path = os.path.join(vs_path, "VC", "Auxiliary", "Build", "vcvarsall.bat")
-	command = ["cl.exe"]
-	command.extend(args)
-	logging.info("invoke cl.exe %s" % str(command))
+	logging.info("invoke %s" % str(args))
 	name = os.path.join(os.getcwd(), "temp.bat")
 	with open(name, "w") as bat:
 		bat.write('set VSCMD_START_DIR=%CD%\n')
 		bat.write('call "%s" %s\n' % (vcvars_path, "amd64"))
-		bat.write(" ".join(command))
+		bat.write(" ".join(args))
 		bat.close()
 	status = subprocess.call([name])
 	#os.unlink("temp.bat")
 	return status
 
+def ar(args):
+	logging.basicConfig(level=logging.DEBUG)
+	logging.info("winfigure (ar) called with arguments %s" % str(args))
+	archive_name = None
+	options = None
+	members = []
+	index = 0
+	while index < len(args):
+		option = args[index]
+		if not options:
+			# short option(s)
+			options = option
+			if options[0] == "-":
+				options = options[1:]
+			for short_option in options:
+				if short_option == "c":
+					# -c Create the archive
+					pass
+				elif short_option == "r":
+					# -r Insert the files member... into archive (with replacement)
+					pass
+				else:
+					raise Exception("unknown option %s" % option)
+		elif not archive_name:
+			archive_name = option
+		else:
+			members.append(option)
+		index += 1
+	lib_options = ["lib.exe"]
+	lib_options.extend(members)
+	lib_options.append("/OUT:%s" % archive_name)
+	status = run_tool(lib_options)
+	return status
+
+
 def run(language, args):
 	logging.basicConfig(level=logging.DEBUG)
 	logging.info("winfigure called with arguments %s" % str(args))
 
-	cl_options = []
+	cl_options = ["cl.exe"]
 	filename = None
 	index = 0
 	output_name = None
@@ -83,15 +116,14 @@ def run(language, args):
 			filename = option
 		index += 1
 
-	options = cl_options
-	options.append(filename)
+	cl_options.append(filename)
 	if output_name:
 		if mode == "exe":
-			options.append("/Fe%s" % output_name)
+			cl_options.append("/Fe%s" % output_name)
 		elif mode == "obj":
-			options.append("/Fo%s" % output_name)
+			cl_options.append("/Fo%s" % output_name)
 		elif mode == "preprocessor":
-			options.append("/Fi%s" % output_name)
-	status = run_cl(options)
+			cl_options.append("/Fi%s" % output_name)
+	status = run_tool(cl_options)
 
 	return status
