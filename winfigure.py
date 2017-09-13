@@ -50,6 +50,9 @@ def run(language, args):
 				output_name = args[index]
 			elif short_option == "O":
 				pass
+			elif short_option == "g":
+				# Produce debugging information in the operating system's native format
+				cl_options.append("/Zi") # /Zi Generates complete debugging information
 			else:
 				raise Exception("unknown option %s" % option)
 		elif len(option) > 2 and option[0] == "-" and option[1] == "-":
