@@ -63,6 +63,10 @@ def run(language, args):
 					cl_options.append("/D%s" % define)
 				else:
 					cl_options.append("/D%s=" % define)
+			elif short_option == "I":
+				# Add the directory dir to the list of directories to be searched for header files
+				dir = option[2:]
+				cl_options.extend(["/I", dir])
 			else:
 				raise Exception("unknown option %s" % option)
 		else:
