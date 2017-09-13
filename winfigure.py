@@ -53,6 +53,11 @@ def run(language, args):
 			elif short_option == "g":
 				# Produce debugging information in the operating system's native format
 				cl_options.append("/Zi") # /Zi Generates complete debugging information
+			elif short_option == "E":
+				# Stop after the preprocessing stage; do not run the compiler proper
+				# The output is in the form of preprocessed source code, which is sent to the standard output
+				cl_options.append("/EP") # /EP Copies preprocessor output to standard output
+				mode = "preprocessor"
 			else:
 				raise Exception("unknown option %s" % option)
 		elif len(option) > 2 and option[0] == "-" and option[1] == "-":
@@ -85,6 +90,8 @@ def run(language, args):
 			options.append("/Fe%s" % output_name)
 		elif mode == "obj":
 			options.append("/Fo%s" % output_name)
+		elif mode == "preprocessor":
+			options.append("/Fi%s" % output_name)
 	status = run_cl(options)
 
 	return status
