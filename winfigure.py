@@ -15,7 +15,7 @@ def run_tool(args):
 	name = os.path.join(os.getcwd(), "temp.bat")
 	with open(name, "w") as bat:
 		bat.write('set VSCMD_START_DIR=%CD%\n')
-		bat.write('call "%s" %s\n' % (vcvars_path, "amd64"))
+		bat.write('call "%s" %s >NUL 2>NUL\n' % (vcvars_path, "amd64"))
 		bat.write(" ".join(args))
 		bat.close()
 	status = subprocess.call([name])
