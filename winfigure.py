@@ -101,6 +101,7 @@ def run(language, args):
 		elif len(option) > 2 and option[0] == "-":
 			# short option with parameter attached, like -D_DUMMY (define)
 			short_option = option[1]
+			long_option = option[1:]
 			if short_option == "D":
 				define = option[2:]
 				if "=" in define:
@@ -114,6 +115,10 @@ def run(language, args):
 			elif short_option == "L":
 				dir = option[2:]
 				link_options.append("/LIBPATH:%s" % dir)
+			elif long_option == "shared":
+				# Produce a shared object which can then be linked with other objects to form an executable
+				mode = "shared"
+				cl_options.append("/LD") # /LD Creates a DLL, Passes the /DLL option to the linker
 			else:
 				raise Exception("unknown option %s" % option)
 		else:
@@ -127,7 +132,7 @@ def run(language, args):
 		output_name = os.path.splitext(filename)[0] + ".o"
 
 	if output_name:
-		if mode == "exe":
+		if mode == "exe" or mode == "shared":
 			cl_options.append("/Fe%s" % output_name)
 		elif mode == "obj":
 			cl_options.append("/Fo%s" % output_name)
