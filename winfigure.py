@@ -19,7 +19,7 @@ def run_tool(args):
 		bat.write(" ".join(args))
 		bat.close()
 	status = subprocess.call([name])
-	#os.unlink("temp.bat")
+	os.unlink("temp.bat")
 	return status
 
 def ar(args):
