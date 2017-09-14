@@ -63,7 +63,7 @@ def run(language, args):
 
 	cl_options = ["cl.exe"]
 	link_options = []
-	filename = None
+	input_files = []
 	index = 0
 	output_name = None
 	mode = "exe"
@@ -115,6 +115,11 @@ def run(language, args):
 			elif short_option == "L":
 				dir = option[2:]
 				link_options.append("/LIBPATH:%s" % dir)
+			elif short_option == "l":
+				# -l Search the library named library when linking
+				library = option[2:]
+				if library != "c": # libc - c runtime
+					link_options.append("/DEFAULTLIB:%s" % library)
 			elif long_option == "shared":
 				# Produce a shared object which can then be linked with other objects to form an executable
 				mode = "shared"
@@ -122,14 +127,14 @@ def run(language, args):
 			else:
 				raise Exception("unknown option %s" % option)
 		else:
-			filename = option
+			input_files.append(option)
 		index += 1
 
-	cl_options.append(filename)
+	cl_options.extend(input_files)
 
 	if not output_name and mode == "obj":
 		# for object files, assume .o by default
-		output_name = os.path.splitext(filename)[0] + ".o"
+		output_name = os.path.splitext(input_files[0])[0] + ".o"
 
 	if output_name:
 		if mode == "exe" or mode == "shared":
