@@ -121,6 +121,11 @@ def run(language, args):
 		index += 1
 
 	cl_options.append(filename)
+
+	if not output_name and mode == "obj":
+		# for object files, assume .o by default
+		output_name = os.path.splitext(filename)[0] + ".o"
+
 	if output_name:
 		if mode == "exe":
 			cl_options.append("/Fe%s" % output_name)
